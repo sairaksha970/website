@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, Suspense } from "react";
+import { useRef, useState, useCallback, Suspense } from "react";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { TextureLoader, MathUtils, Mesh, Group } from "three";
 import { motion, useInView } from "framer-motion";
@@ -13,16 +13,7 @@ import gallery6 from "@/assets/gallery-6.jpg";
 import gallery7 from "@/assets/gallery-7.jpg";
 import gallery8 from "@/assets/gallery-8.jpg";
 
-const galleryImages = [
-  { src: gallery1, label: "Our Farms" },
-  { src: gallery2, label: "Processing Plant" },
-  { src: gallery3, label: "Farmer Care" },
-  { src: gallery4, label: "Our Products" },
-  { src: gallery5, label: "Delivery Fleet" },
-  { src: gallery6, label: "Happy Families" },
-  { src: gallery7, label: "Quality Lab" },
-  { src: gallery8, label: "Packaging Line" },
-];
+const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6, gallery7, gallery8];
 
 // Staggered 2-row grid positions (some higher, some lower)
 const cardPositions = [
@@ -38,7 +29,6 @@ const cardPositions = [
 
 interface FloatingCardProps {
   image: string;
-  label: string;
   position: { x: number; y: number; phase: number };
   index: number;
   mousePos: { x: number; y: number };
@@ -46,7 +36,7 @@ interface FloatingCardProps {
   onSelect: (index: number) => void;
 }
 
-const FloatingCard = ({ image, label, position, index, mousePos, isVisible, onSelect }: FloatingCardProps) => {
+const FloatingCard = ({ image, position, index, mousePos, isVisible, onSelect }: FloatingCardProps) => {
   const meshRef = useRef<Group>(null);
   const innerRef = useRef<Mesh>(null);
   const texture = useLoader(TextureLoader, image);
@@ -117,36 +107,30 @@ const FloatingCard = ({ image, label, position, index, mousePos, isVisible, onSe
       <mesh
         ref={innerRef}
         position={[0, 0, 0.01]}
-        onPointerEnter={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerLeave={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onPointerEnter={() => {
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerLeave={() => {
+          setHovered(false);
+          document.body.style.cursor = "default";
+        }}
         onClick={() => onSelect(index)}
       >
         <planeGeometry args={[1.88, 1.48]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          opacity={1 - distFromCenter * 0.15}
-        />
+        <meshBasicMaterial map={texture} transparent opacity={1 - distFromCenter * 0.15} />
       </mesh>
 
       {/* Glass morphism overlay on edges */}
       <mesh position={[0, 0, 0.02]}>
         <planeGeometry args={[1.88, 1.48]} />
-        <meshBasicMaterial
-          color="#ffffff"
-          transparent
-          opacity={hovered ? 0.08 : 0.03}
-        />
+        <meshBasicMaterial color="#ffffff" transparent opacity={hovered ? 0.08 : 0.03} />
       </mesh>
 
       {/* Reflection layer below */}
       <mesh position={[0, -1.1, -0.01]} rotation={[Math.PI, 0, 0]}>
         <planeGeometry args={[1.88, 0.6]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          opacity={0.08}
-        />
+        <meshBasicMaterial map={texture} transparent opacity={0.08} />
       </mesh>
     </group>
   );
@@ -165,9 +149,8 @@ const Scene = ({ mousePos, isVisible, onSelect }: {
 
       {galleryImages.map((img, i) => (
         <FloatingCard
-          key={img.label}
-          image={img.src}
-          label={img.label}
+          key={`gallery-${i}`}
+          image={img}
           position={cardPositions[i]}
           index={i}
           mousePos={mousePos}
@@ -199,7 +182,7 @@ const GallerySection = () => {
         <SectionHeading
           badge="Gallery"
           title="A Glimpse Into Our World"
-          subtitle="From the farm to your family — the people, the process, and the passion behind every drop."
+          subtitle="From the farm to your family - the people, the process, and the passion behind every drop."
         />
       </div>
 
@@ -212,31 +195,12 @@ const GallerySection = () => {
           camera={{ position: [0, 0, 6], fov: 50 }}
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
-          style={{ background: 'transparent' }}
+          style={{ background: "transparent" }}
         >
           <Suspense fallback={null}>
-            <Scene
-              mousePos={mousePos}
-              isVisible={isInView}
-              onSelect={setSelectedImage}
-            />
+            <Scene mousePos={mousePos} isVisible={isInView} onSelect={setSelectedImage} />
           </Suspense>
         </Canvas>
-
-        {/* Floating labels */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 flex-wrap px-4 pointer-events-none">
-          {galleryImages.map((img, i) => (
-            <motion.span
-              key={img.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }}
-              className="text-xs font-display font-semibold text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/50"
-            >
-              {img.label}
-            </motion.span>
-          ))}
-        </div>
       </div>
 
       {/* Fullscreen modal on click */}
@@ -257,21 +221,12 @@ const GallerySection = () => {
             style={{ transformStyle: "preserve-3d" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={galleryImages[selectedImage].src}
-              alt={galleryImages[selectedImage].label}
-              className="w-full rounded-2xl shadow-2xl"
-            />
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-foreground/60 to-transparent rounded-b-2xl">
-              <p className="text-background font-display text-xl font-bold">
-                {galleryImages[selectedImage].label}
-              </p>
-            </div>
+            <img src={galleryImages[selectedImage]} alt="Gomukhi gallery image" className="w-full rounded-2xl shadow-2xl" />
             <button
               onClick={() => setSelectedImage(null)}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center text-background hover:bg-background/40 transition-colors"
             >
-              ✕
+              X
             </button>
           </motion.div>
         </motion.div>

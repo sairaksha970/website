@@ -4,7 +4,7 @@ import AnimatedSection from "@/components/AnimatedSection";
 import SectionHeading from "@/components/SectionHeading";
 import { Users, HandCoins, GraduationCap, Stethoscope, TrendingUp, Heart } from "lucide-react";
 import farmersHeroImg from "@/assets/farmers-hero.jpg";
-import farmersImg from "@/assets/farmers.jpg";
+import farmersImg from "@/assets/farmers-story.jpg";
 
 const Farmers = () => {
   return (
